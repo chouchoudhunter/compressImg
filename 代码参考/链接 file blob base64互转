@@ -1,0 +1,71 @@
+file格式转Blob
+
+```html
+<input type="file" accept="image/*" @change="upLoad">
+upLoad(e){
+  console.log(this.getFileUrl(e.srcElement))
+},
+getFileUrl(obj) { 
+  let url; 
+  url = window.URL.createObjectURL(obj.files.item(0)); 
+  return url; 
+},
+```
+
+base64转Blob
+
+```javascript
+//ndata为base64格式地址
+let arr = ndata.split(','), mime = arr[0].match(/:(.*?);/)[1],
+  bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+while (n--) {
+  u8arr[n] = bstr.charCodeAt(n);
+}
+let bdata = new Blob([u8arr], {type: mime})
+```
+
+通过XHR的方法来转转Blob
+
+```javascript
+let xhr = new XMLHttpRequest();
+xhr.open("get", "http://mybg.oss-cn-hangzhou.aliyuncs.com/2019031510452423", true);
+xhr.responseType = "blob";
+xhr.onload = function (res) {
+  if (this.status == 200) {
+    var blob = this.response;
+    var img = document.createElement("img");
+    img.onload = function (e) {
+      window.URL.revokeObjectURL(img.src); // 清除释放
+    };
+    //img.src为Blob格式的img资源
+    img.src = window.URL.createObjectURL(blob);
+    console.log(img.src)
+  }
+}
+xhr.send();
+```
+
+ base64转blob
+
+```javascript
+	function dataURItoBlob (dataURI) {
+	    // convert base64/URLEncoded data component to raw binary data held in a string
+	    var byteString;
+	    if (dataURI.split(',')[0].indexOf('base64') >= 0)
+	        byteString = atob(dataURI.split(',')[1]);
+	    else
+	        byteString = unescape(dataURI.split(',')[1]);
+
+	    // separate out the mime component
+	    var mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+
+	    // write the bytes of the string to a typed array
+	    var ia = new Uint8Array(byteString.length);
+	    for (var i = 0; i < byteString.length; i++) {
+	        ia[i] = byteString.charCodeAt(i);
+	    }
+
+	    return new BlobFormDataShim.Blob([ia.buffer], {type: mimeString});
+	}
+```
+
